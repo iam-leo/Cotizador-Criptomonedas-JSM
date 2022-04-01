@@ -23,13 +23,22 @@ const obtenerCriptomonedas = criptomonedas => new Promise(resolve => {
     resolve(criptomonedas);
 })
 
-function consultatCriptomonedas() {
+async function consultatCriptomonedas() {
     const url = 'https://min-api.cryptocompare.com/data/top/mktcapfull?limit=10&tsym=ARS';
 
-    fetch(url)
-        .then(respuesta => respuesta.json())
-        .then(resultado => obtenerCriptomonedas(resultado.Data))
-        .then(criptomonedas => selectCriptomonedas(criptomonedas))
+    // fetch(url)
+    //     .then(respuesta => respuesta.json())
+    //     .then(resultado => obtenerCriptomonedas(resultado.Data))
+    //     .then(criptomonedas => selectCriptomonedas(criptomonedas))
+
+    try {
+        const respuesta = await fetch(url);
+        const resultado = await respuesta.json();
+        const criptomonedas = await obtenerCriptomonedas(resultado.Data);
+        selectCriptomonedas(criptomonedas);
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 function selectCriptomonedas(criptomonedas) {
@@ -79,20 +88,27 @@ function mostrarAlerta(mensaje){
     }
 }
 
-function consultarAPI() {
+async function consultarAPI() {
     const { moneda, criptomoneda } = objBusqueda;
 
     const url = `https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${criptomoneda}&tsyms=${moneda}`;
 
     mostrarSpinner();
 
-    setTimeout(() => {
-        fetch(url)
-            .then(respuesta => respuesta.json())
-            .then(resultado => {
-            mostrarCotizacionHTML(resultado.DISPLAY[criptomoneda][moneda]);
-        })
-    }, 3500);
+    
+    // fetch(url)
+    //     .then(respuesta => respuesta.json())
+    //     .then(resultado => {
+    //     mostrarCotizacionHTML(resultado.DISPLAY[criptomoneda][moneda]);
+    //     })
+
+    try {
+        const respuesta = await fetch(url);
+        const cotizacion = await respuesta.json();
+        mostrarCotizacionHTML(cotizacion.DISPLAY[criptomoneda][moneda]);
+    } catch (error) {
+        console.log(error);
+    }
 
 }
 
@@ -118,7 +134,7 @@ function mostrarCotizacionHTML(cotizacion) {
 
     const precio = document.createElement('p');
     precio.classList.add('precio');
-    precio.innerHTML = `Un ${criptoM} es igual a: <br><span>$${PRICE}</span>`;
+    precio.innerHTML = `Un ${criptoM} es igual a: <br><span>${PRICE}</span>`;
 
     const precioAlto = document.createElement('p');
     precioAlto.innerHTML = `El precio mas alto del dia es: <span>${HIGHDAY}</span>`;
